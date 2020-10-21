@@ -1,33 +1,45 @@
 #!/usr/bin/env nextflow
 
-ch_flat = Channel.fromFilePairs("${params.s3_folder}/*{vcf.gz,csi}", flat: true)
-ch_notflat = Channel.fromFilePairs("${params.s3_folder}/*{vcf.gz,csi}")
+Channel
+    .from(
+      [1, "case_one"],
+      [1, "case_two"],
+      [0, "CTRL_ONE"],
+      [0, "CTRL_TWO"])
+    .branch {
+        cases: it[0] == 1
+        controls: it[0] == 0
+    }
+    .set { ch_input_files }
 
-process print_filename {
-  echo true
+ ch_input_files.cases.dump(tag: 'cases')
+ ch_input_files.controls.dump(tag: 'controls')
+
+process echo_cases {
+  tag "status:${status}, id:${id}" 
   
   input: 
-  set val(vcf_basename), val(vcf_path), val(csi_path) from ch_flat
+  set val(status), val(id) from  ch_input_files.cases
   
   output: 
-  file("${vcf_basename}_print.txt") into ch_force_serial
+  file("${id}_fake_input.txt") into ch_force_serial
 
   script:
   """
-  echo "pre: $vcf_basename\nvcf: $vcf_path\ncsi: $csi_path" 
-  echo "pre: $vcf_basename\nvcf: $vcf_path\ncsi: $csi_path" > ${vcf_basename}_print.txt
+  echo "status: $status\nid: $id" 
+  echo "status: $status\nid: $id" > "${id}_fake_input.txt"
   """
 }
 
-process print_filename_not_flat {
-  echo true
+process echo_controls {
+  tag "status:${status}, id:${id}" 
   
   input: 
-  set val(vcf_basename), val(pair) from ch_notflat
+  set val(status), val(id) from  ch_input_files.controls
   file(pseudo_dependency) from ch_force_serial
 
   script:
   """
-  echo "pre: $vcf_basename\npair: $pair"
+  echo "status: $status\nid: $id" 
   """
 }

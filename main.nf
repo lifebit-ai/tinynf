@@ -1,33 +1,16 @@
 #!/usr/bin/env nextflow
 
-ch_flat = Channel.fromFilePairs("${params.s3_folder}/*{vcf.gz,csi}", flat: true)
-ch_notflat = Channel.fromFilePairs("${params.s3_folder}/*{vcf.gz,csi}")
+// ch_pairs = Channel.fromFilePairs("${params.s3_folder_pairs}/*{vcf.gz,vcf.gz.csi}", flat: true, checkIfExists: true)
+// ch_no_pairs = Channel.fromFilePairs("${params.s3_folder_no_pairs}/*{vcf.gz,vcf.gz.csi}", flat: true, checkIfExists: true)
 
-process print_filename {
-  echo true
-  
-  input: 
-  set val(vcf_basename), val(vcf_path), val(csi_path) from ch_flat
-  
-  output: 
-  file("${vcf_basename}_print.txt") into ch_force_serial
 
-  script:
-  """
-  echo "pre: $vcf_basename\nvcf: $vcf_path\ncsi: $csi_path" 
-  echo "pre: $vcf_basename\nvcf: $vcf_path\ncsi: $csi_path" > ${vcf_basename}_print.txt
-  """
-}
 
-process print_filename_not_flat {
-  echo true
-  
-  input: 
-  set val(vcf_basename), val(pair) from ch_notflat
-  file(pseudo_dependency) from ch_force_serial
+// ch_pairs.view()
+// ch_no_pairs.view()
 
-  script:
-  """
-  echo "pre: $vcf_basename\npair: $pair"
-  """
-}
+
+Channel.fromPath("${params.s3_folder_pairs}/*{vcf.gz,vcf.gz.csi}").map { it -> [ file(it).simpleName, it] }.groupBy {by:it[0]}[0].view()
+
+ch_no_pairs = Channel.fromPath("${params.s3_folder_no_pairs}/*{vcf.gz,vcf.gz.csi}")
+
+

@@ -1,33 +1,44 @@
 #!/usr/bin/env nextflow
 
-ch_flat = Channel.fromFilePairs("${params.s3_folder}/*{vcf.gz,csi}", flat: true)
-ch_notflat = Channel.fromFilePairs("${params.s3_folder}/*{vcf.gz,csi}")
+Channel.fromPath("${params.s3_folder_pairs}/*{${params.file_suffix},${params.index_suffix}}")
+       .map { it -> [ file(it).simpleName, it] }
+       .groupTuple(by:0)
+       .set { ch_pairs }
 
-process print_filename {
+Channel.fromPath("${params.s3_folder_no_pairs}/*{${params.file_suffix},${params.index_suffix}}")
+       .map { it -> [ file(it).simpleName, it] }
+       .groupTuple(by:0)
+       .set { ch_no_pairs }
+
+process pairs {
+  tag "PAIRS: simpleName:${name}, file(s):${file_or_pair_of_files}" 
   echo true
-  
+
   input: 
-  set val(vcf_basename), val(vcf_path), val(csi_path) from ch_flat
+  set val(name), file(file_or_pair_of_files) from  ch_pairs
   
   output: 
-  file("${vcf_basename}_print.txt") into ch_force_serial
+  file("${name}_fake_input.txt") into ch_force_serial
 
   script:
   """
-  echo "pre: $vcf_basename\nvcf: $vcf_path\ncsi: $csi_path" 
-  echo "pre: $vcf_basename\nvcf: $vcf_path\ncsi: $csi_path" > ${vcf_basename}_print.txt
+  echo "when in pairs:"
+  echo "simpleName:${name}\nfile(s):${file_or_pair_of_files}"
+  echo "simpleName:${name}\nfile(s):${file_or_pair_of_files}" > "${name}_fake_input.txt"
   """
 }
 
-process print_filename_not_flat {
+process no_pairs {
+  tag "NOT PAIRS: simpleName:${name}, file(s):${file_or_pair_of_files}" 
   echo true
-  
+
   input: 
-  set val(vcf_basename), val(pair) from ch_notflat
+  set val(name), file(file_or_pair_of_files) from  ch_no_pairs
   file(pseudo_dependency) from ch_force_serial
 
   script:
   """
-  echo "pre: $vcf_basename\npair: $pair"
+  echo "when NO pairs:"
+  echo "simpleName:${name}\nfile(s):${file_or_pair_of_files}"
   """
 }

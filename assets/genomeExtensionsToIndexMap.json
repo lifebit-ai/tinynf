@@ -1,0 +1,21 @@
+{
+  ".bam": ".bai",
+  ".vcf": ".tbi",
+  ".vcf.gz": ".tbi",
+  ".vcf.gz": ".vcf.gz.csi",
+  ".bed": ".tbi",
+  ".gff": ".tbi",
+  ".gff.gz": ".tbi",
+  ".gtf": ".tbi",
+  ".gtf.gz": ".tbi",
+  ".gff3": ".tbi",
+  ".gff3.gz": ".tbi",
+  ".wig": "",
+  ".bigWig": "",
+  ".bedGraph": "",
+  ".seg": "",
+  ".fa": ".fai",
+  ".fa.gz": ".tbi",
+  ".fasta": ".fai",
+  ".fasta.gz": ".tbi"
+}

@@ -1,7 +1,7 @@
 # tinynf
 
-Test retrieving file paths without staging the files from an S3 bucket:
+Test the replacer of the `choice()` operator, `branch()` (NF >=20.01.0)
 
 ```bash
-nextflow run lifebit-ai/tinynf --s3_folder s3://lifebit-featured-datasets/projects/avt/vcf-tests/
+nextflow run main.nf
 ```

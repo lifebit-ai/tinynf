@@ -1,45 +1,38 @@
 #!/usr/bin/env nextflow
 
-Channel
-    .from(
-      [1, "case_one"],
-      [1, "case_two"],
-      [0, "CTRL_ONE"],
-      [0, "CTRL_TWO"])
-    .branch {
-        cases: it[0] == 1
-        controls: it[0] == 0
-    }
-    .set { ch_input_files }
+ch_names   = Channel.from( ['a', 'file1'], ['b','file2'] )
+(ch_names_tuple, ch_names_set) = ch_names.into(2)
 
- ch_input_files.cases.dump(tag: 'cases')
- ch_input_files.controls.dump(tag: 'controls')
+process output_tuple {
 
-process echo_cases {
-  tag "status:${status}, id:${id}" 
-  
-  input: 
-  set val(status), val(id) from  ch_input_files.cases
-  
-  output: 
-  file("${id}_fake_input.txt") into ch_force_serial
+  input:
+  tuple val(id), val(name) from ch_names_tuple
+
+  output:
+  tuple val(id), file("${name}.txt") into ch_tuple
 
   script:
   """
-  echo "status: $status\nid: $id" 
-  echo "status: $status\nid: $id" > "${id}_fake_input.txt"
+  echo Creating $id
+  touch ${name}.txt
   """
 }
 
-process echo_controls {
-  tag "status:${status}, id:${id}" 
-  
-  input: 
-  set val(status), val(id) from  ch_input_files.controls
-  file(pseudo_dependency) from ch_force_serial
+ch_tuple.view()
+
+process output_set {
+
+  input:
+  tuple val(id), val(name) from ch_names_set
+
+  output:
+  set val(id), file("${name}.txt") into ch_set
 
   script:
   """
-  echo "status: $status\nid: $id" 
+  echo Creating $id
+  touch ${name}.txt
   """
 }
+
+ch_set.view()

@@ -1,44 +1,91 @@
 #!/usr/bin/env nextflow
 
-Channel.fromPath("${params.s3_folder_pairs}/*{${params.file_suffix},${params.index_suffix}}")
-       .map { it -> [ file(it).simpleName, it] }
-       .groupTuple(by:0)
-       .set { ch_pairs }
+// Create the channel for the fasta file if provided
+if (params.local_file)  {ch_local_file = Channel.value(file(params.local_file, checkIfExists: true)) }
+if (params.https_file)  {ch_https_file = Channel.value(file(params.https_file, checkIfExists: true)) }
+if (params.s3_file)     {ch_s3_file = Channel.value(file(params.s3_file, checkIfExists: true)) }
 
-Channel.fromPath("${params.s3_folder_no_pairs}/*{${params.file_suffix},${params.index_suffix}}")
-       .map { it -> [ file(it).simpleName, it] }
-       .groupTuple(by:0)
-       .set { ch_no_pairs }
+if (params.local_file)  {ch_val_local_file = Channel.value(params.local_file) }
+if (params.https_file)  {ch_val_https_file = Channel.value(params.https_file) }
+if (params.s3_file)     {ch_val_s3_file = Channel.value(params.s3_file) }
 
-process pairs {
-  tag "PAIRS: simpleName:${name}, file(s):${file_or_pair_of_files}" 
+process local {
+  tag "local file: ${local_file}" 
   echo true
 
   input: 
-  set val(name), file(file_or_pair_of_files) from  ch_pairs
+  file(local_file) from ch_local_file
   
-  output: 
-  file("${name}_fake_input.txt") into ch_force_serial
-
   script:
   """
-  echo "when in pairs:"
-  echo "simpleName:${name}\nfile(s):${file_or_pair_of_files}"
-  echo "simpleName:${name}\nfile(s):${file_or_pair_of_files}" > "${name}_fake_input.txt"
+  ls -L
   """
 }
 
-process no_pairs {
-  tag "NOT PAIRS: simpleName:${name}, file(s):${file_or_pair_of_files}" 
+process https {
+  tag "https file: ${https_file}" 
   echo true
 
   input: 
-  set val(name), file(file_or_pair_of_files) from  ch_no_pairs
-  file(pseudo_dependency) from ch_force_serial
-
+  file(https_file) from ch_https_file
+  
   script:
   """
-  echo "when NO pairs:"
-  echo "simpleName:${name}\nfile(s):${file_or_pair_of_files}"
+  ls -L
   """
 }
+
+process s3 {
+  tag "s3 file: ${s3_file}" 
+  echo true
+
+  input: 
+  file(s3_file) from ch_s3_file
+  
+  script:
+  """
+  ls -L
+  """
+}
+
+
+
+process local_as_val {
+  tag "local file: ${local_file}" 
+  echo true
+
+  input: 
+  file(local_file) from ch_val_local_file
+  
+  script:
+  """
+  ls -L
+  """
+}
+
+process https_as_val {
+  tag "https file: ${https_file}" 
+  echo true
+
+  input: 
+  file(https_file) from ch_val_https_file
+  
+  script:
+  """
+  ls -L
+  """
+}
+
+process s3_as_val {
+  tag "s3 file: ${s3_file}" 
+  echo true
+
+  input: 
+  file(s3_file) from ch_val_s3_file
+  
+  script:
+  """
+  ls -L
+  """
+}
+

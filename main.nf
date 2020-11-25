@@ -17,6 +17,6 @@ process stage_file {
   script:
   """
   df -h ~
-  tree -f ~
+  tree -f /tmp
   """
 }

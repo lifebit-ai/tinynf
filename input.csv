@@ -1,0 +1,4 @@
+s3://lifebit-featured-datasets/IGV/IGV/samplot/test_site_cmds.sh
+s3://lifebit-featured-datasets/IGV/vcf/chr22-simulated_hapgen-updated.vcf.gz.csi
+s3://lifebit-featured-datasets/IGV/samplot/subset_alignments.sh
+s3://lifebit-featured-datasets/IGV/samplot/hg19_chr1_58343117_58343622_deletion.bam.bai

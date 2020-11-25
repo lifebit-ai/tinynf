@@ -1,25 +1,22 @@
 #!/usr/bin/env nextflow
 
-// Create the channel for the fasta file if provided
-if (params.with_scratch_process_file)  {ch_with_scratch_process_file = Channel.value(file(params.with_scratch_process_file, checkIfExists: true)) }
-if (params.no_scratch_process_file)     {ch_no_scratch_process_file = Channel.value(file(params.no_scratch_process_file, checkIfExists: true)) }
+Channel
+    .fromPath(params.input)
+    .ifEmpty { exit 1, "Input .csv file is not found at ${params.input}. Is the file path correct?"}
+    .splitCsv()
+    .flatten()
+    .into{ ch_input }
 
-process with_scratch {
+process stage_file {
+  tag "${input}"
+  echo true
 
   input: 
-  file(with_scratch_process_file) from ch_with_scratch_process_file
+  file(input) from ch_input
 
   script:
   """
-  """
-}
-
-process no_scratch {
-
-  input: 
-  file(no_scratch_process_file) from ch_no_scratch_process_file
-  
-  script:
-  """
+  df -h ~
+  tree -f ~ | grep ${params.path_pattern} | head -1
   """
 }

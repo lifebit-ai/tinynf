@@ -5,7 +5,7 @@ Channel
     .ifEmpty { exit 1, "Input .csv file is not found at ${params.input}. Is the file path correct?"}
     .splitCsv()
     .flatten()
-    .into{ ch_input }
+    .set{ ch_input }
 
 process stage_file {
   tag "${input}"

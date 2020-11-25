@@ -17,6 +17,6 @@ process stage_file {
   script:
   """
   df -h ~
-  tree -f ~ | grep ${params.path_pattern} | head -1
+  tree -f ~
   """
 }

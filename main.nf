@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 Channel
-    .fromPath(params.input)
+    .fromPath(file(params.input))
     .ifEmpty { exit 1, "Input .csv file is not found at ${params.input}. Is the file path correct?"}
     .splitCsv()
     .flatten()
@@ -16,6 +16,7 @@ process stage_file {
 
   script:
   """
+  ls -l $input
   df -h ~
   tree -f ~ | grep ${params.path_pattern} | head -1
   """
